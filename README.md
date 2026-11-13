@@ -1,12 +1,14 @@
 # 智库 Demo
 
+**[点击打开在线 Demo](https://leo131496.github.io/HTEP/)**
+
 可直接打开的移动端智库交互原型，按照 iPhone 14 Pro 的 **393 × 852** 尺寸设计。HTML 内置样式、脚本及示例文件，无需安装依赖或构建。
 
 ## 使用
 
 下载仓库后，使用 Chrome、Edge 或 Safari 打开 [`index.html`](index.html)。也可通过任意静态网站服务托管。
 
-如需启用 GitHub Pages：在仓库 **Settings → Pages** 中选择 **Deploy from a branch**，分支选择 **main**、目录选择 **/(root)**，然后保存。是否启用及最终站点地址以 GitHub Pages 设置为准。
+在线体验请访问 **https://leo131496.github.io/HTEP/**。本站通过 GitHub Pages 从 `main` 分支根目录发布，更新该分支后会自动部署。
 
 ## 功能
 
@@ -20,7 +22,7 @@
 
 ## 预览
 
-<img src="preview.png" alt="智库首页预览" width="393">
+<a href="https://leo131496.github.io/HTEP/"><img src="preview.png" alt="点击体验智库 Demo" width="393"></a>
 
 ## 演示说明
 
