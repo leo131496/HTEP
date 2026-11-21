@@ -14,7 +14,7 @@ const path=require('node:path');
   await page.goto(root);await page.locator('.sidebar').waitFor();assert.equal(await page.locator('#login-form,[data-action=logout]').count(),0);assert.equal(await page.locator('.kpi').count(),4);await capture('02-员工数据看板');
   assert.equal(await page.locator('.sidebar nav a').count(),5);
   const total=await page.evaluate(()=>M.filteredEvents(S,range).length);assert.equal(await page.evaluate(()=>Object.values(M.totals(stats())).reduce((a,b)=>a+b,0)),total);
-  const download=page.waitForEvent('download');await page.locator('[data-action=export-events]').click();const exported=await download;const csv=await fs.readFile(await exported.path(),'utf8');assert(!csv.includes('访客'));
+  const download=page.waitForEvent('download');await page.locator('[data-action=export-dashboard]').click();const exported=await download;assert(exported.suggestedFilename().endsWith('.xlsx'));const workbook=await require('./jszip.min.js').loadAsync(await fs.readFile(await exported.path()));assert(!(await workbook.file('xl/worksheets/sheet5.xml').async('string')).includes('访客'));
   await page.locator('#date-filter [name=department]').selectOption('产品部');await page.locator('#date-filter button[type=submit]').click();assert.equal(await page.evaluate(()=>stats().every(e=>e.department==='产品部')),true);
   await nav('ranking');await capture('03-员工排名');await page.locator('[data-id=share][data-action=rank-metric]').click();assert(await page.evaluate(()=>{const rows=M.ranking(S,stats(),rankMetric);return rows.every((r,i)=>!i||r.share<=rows[i-1].share);}));
   await nav('content');assert.equal(await page.locator('.content-table tbody tr').count(),6);await capture('04-素材库内容管理');
