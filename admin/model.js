@@ -76,10 +76,10 @@ function parseCSV(text){
 }
 function importEmployees(state,text){
  const rows=parseCSV(text);if(rows.length<2)throw Error('文件中没有员工数据');
- const expected=['姓名','手机号','工号','部门','角色'];if(rows[0].map(x=>x.trim()).join(',')!==expected.join(','))throw Error('表头应为：姓名,手机号,工号,部门,角色');
+ const header=rows[0].map(x=>x.trim()).join(',');if(!['姓名,手机号,工号,部门','姓名,手机号,工号,部门,角色'].includes(header))throw Error('表头应为：姓名,手机号,工号,部门');
  if(rows.length>501)throw Error('每次最多导入 500 名员工');
  const result=[],draft={...state,employees:[...state.employees]};
- for(let i=1;i<rows.length;i++){try{if(rows[i].length!==5)throw Error('需要 5 列');const [name,phone,number,department,roleName]=rows[i].map(x=>x.trim());const role=Object.keys(roles).find(k=>roles[k]===roleName);const e={id:uid('employee'),name,phone,number,department,role,enabled:true,deleted:false,created:new Date().toISOString().slice(0,10)};validateEmployee(draft,e);draft.employees.push(e);result.push(e);}catch(error){throw Error('第 '+(i+1)+' 行：'+error.message);}}
+ for(let i=1;i<rows.length;i++){try{if(rows[i].length!==rows[0].length)throw Error('列数与表头不一致');const [name,phone,number,department,roleName]=rows[i].map(x=>x.trim());const role=roleName?Object.keys(roles).find(k=>roles[k]===roleName):'employee';const e={id:uid('employee'),name,phone,number,department,role,enabled:true,deleted:false,created:new Date().toISOString().slice(0,10)};validateEmployee(draft,e);draft.employees.push(e);result.push(e);}catch(error){throw Error('第 '+(i+1)+' 行：'+error.message);}}
  return result;
 }
 const api={MAX_FILE,roles,actions,departments,roleActions,uid,seed,path,validateFolder,validateScope,canView,canAct,allowed,validateEmployee,fileKind,validateFile,filteredEvents,totals,ranking,parseCSV,importEmployees};
