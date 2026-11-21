@@ -2,6 +2,8 @@
 
 **[点击打开在线 Demo](https://leo131496.github.io/HTEP/)**
 
+**[打开智库管理后台](https://leo131496.github.io/HTEP/admin/)** · [后台功能设计与演示账号](admin/README.md)
+
 可直接打开的移动端智库交互原型，按照 iPhone 14 Pro 的 **393 × 852** 尺寸设计。HTML 内置样式、脚本及示例文件，无需安装依赖或构建。
 
 ## 使用
