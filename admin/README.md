@@ -1,6 +1,8 @@
 # 智库管理后台 Demo
 
-**[进入管理后台](https://leo131496.github.io/HTEP/admin/)** · **[打开手机端](https://leo131496.github.io/HTEP/)**
+**[进入管理后台](https://leo131496.github.io/HTEP/?view=admin)** · **[切换手机端](https://leo131496.github.io/HTEP/?view=mobile)**
+
+同一展示页顶部提供「手机端 / 管理后台」两个 tab，切换时保留各端页面与手机端会话。
 
 ## 手机端与后台分工
 
@@ -34,7 +36,7 @@
 
 后台上传由「后台管理员」执行，不直接加入员工贡献；示例中员工上传为历史行为数据。看板与排名共用员工事件列表。员工、知识删除或禁用后，既有历史贡献不会被反向删除。
 
-[![后台预览](preview.png)](https://leo131496.github.io/HTEP/admin/)
+[![后台预览](preview.png)](https://leo131496.github.io/HTEP/?view=admin)
 
 ## Demo 边界
 
@@ -46,10 +48,10 @@
 
 ## 验证与运行
 
-在仓库根目录运行 `python3 -m http.server 4188 --bind 127.0.0.1`，分别访问 `/` 与 `/admin/`。
+在仓库根目录运行 `python3 -m http.server 4188 --bind 127.0.0.1`，访问 `/`，通过顶部两个 tab 查看；底层独立页面分别为 `/mobile/` 和 `/admin/`。
 
 - `check-model.cjs`：统计、文件大小边界、目录校验、权限交集、员工 CSV 校验。
 - `check-ui.cjs`：后台直接进入、看板、内容上传保存、员工管理、审核和布局。
 - `check-mobile-login.cjs`：手机端登录、错误验证码、停用账号、直接详情链接保护、退出与刷新、账号记录隔离、同浏览器员工名单联动及两端独立入口。
 
-浏览器检查需要 Playwright。手机端源码位于工作区 `ThinktankDemo`，发布文件为仓库根目录的独立 `index.html`。
+浏览器检查需要 Playwright。手机端源码位于工作区 `ThinktankDemo`，发布文件为 `mobile/index.html`；仓库根目录的 `index.html` 为双 tab 展示页。

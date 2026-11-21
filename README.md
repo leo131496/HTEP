@@ -1,12 +1,10 @@
 # 智库 Demo
 
-**[打开手机端 Demo](https://leo131496.github.io/HTEP/)**
+**[打开统一演示页面](https://leo131496.github.io/HTEP/)**
 
-**[打开智库管理后台](https://leo131496.github.io/HTEP/admin/)** · [后台功能设计与演示账号](admin/README.md)
+打开同一个地址，通过顶部「手机端 / 管理后台」两个 tab 切换。切换时保留页面位置、表单输入和手机端登录状态。默认显示手机端，后台直接进入管理界面。
 
-手机端使用员工手机号登录，管理后台直接进入管理界面。
-
-移动端智库交互原型，按照 iPhone 14 Pro 的 **393 × 852** 尺寸设计。HTML 内置样式、脚本及示例文件，无需安装依赖或构建。
+[后台功能设计](admin/README.md)
 
 ## 两端功能与进入方式
 
@@ -19,9 +17,9 @@
 
 ## 使用
 
-下载仓库后，使用 Chrome、Edge 或 Safari 打开 [`index.html`](index.html)。也可通过任意静态网站服务托管。
+仓库根目录的 `index.html` 是统一演示页；手机端在 `mobile/index.html`，后台在 `admin/index.html`。本地请使用静态 HTTP 服务打开根目录，例如 `python3 -m http.server 4188 --bind 127.0.0.1`。
 
-在线体验请访问 **https://leo131496.github.io/HTEP/**。本站通过 GitHub Pages 从 `main` 分支根目录发布，更新该分支后会自动部署。
+在线体验请访问 **https://leo131496.github.io/HTEP/**。本站通过 GitHub Pages 从 `main` 分支根目录发布，更新该分支后会自动部署。统一页支持 tab 键盘切换、浏览器前进/后退和刷新恢复当前端；原有知识详情链接仍可通过首页打开。
 
 ## 文件夹浏览
 
@@ -43,7 +41,7 @@
 
 ## 预览
 
-<a href="https://leo131496.github.io/HTEP/"><img src="preview.png" alt="点击体验智库 Demo" width="393"></a>
+<a href="https://leo131496.github.io/HTEP/"><img src="preview.png" alt="手机端与管理后台双 tab 演示" width="960"></a>
 
 ## 演示说明
 
