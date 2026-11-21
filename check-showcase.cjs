@@ -7,7 +7,7 @@ const path=require('node:path');
   const context=await browser.newContext({viewport:{width:1440,height:1000},acceptDownloads:true}),page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const root='http://127.0.0.1:4188/';const mobile=page.frameLocator('#frame-mobile'),admin=page.frameLocator('#frame-admin');
   const tab=async name=>{await page.getByRole('tab',{name,exact:true}).click();};
-  await page.goto(root);await mobile.locator('#mobile-login-form').waitFor();assert.equal(await page.getByRole('tab').count(),2);assert.equal(await page.getByRole('tab',{name:'手机端',exact:true}).getAttribute('aria-selected'),'true');
+  await page.goto(root);await mobile.locator('#mobile-login-form').waitFor();assert.equal(await page.locator('header h1').innerText(),'素材库 Demo');assert.equal(await mobile.locator('.brand').innerText(),'素材库');assert.equal(await mobile.locator('.mobile-login-submit').innerText(),'登录素材库');assert.equal(await page.getByRole('tab').count(),2);assert.equal(await page.getByRole('tab',{name:'手机端',exact:true}).getAttribute('aria-selected'),'true');
   const phoneBox=await page.locator('.phone-frame').boundingBox();assert.equal(phoneBox.width,393);assert.equal(phoneBox.height,852);
   await page.screenshot({path:path.join(__dirname,'preview.png'),animations:'disabled'});
   await mobile.locator('#mobile-phone').fill('13900000004');await mobile.locator('#mobile-code').fill('654321');

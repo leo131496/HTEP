@@ -9,7 +9,7 @@ const path=require('node:path');
   for(const p of [admin,phone])p.on('pageerror',e=>errors.push(e.message));
   await admin.setViewportSize({width:1440,height:1000});await phone.setViewportSize({width:393,height:852});
   await admin.goto('http://127.0.0.1:4188/admin/');await admin.locator('.sidebar').waitFor();
-  assert.equal(await admin.locator('#login-form,[data-action=logout]').count(),0);assert.equal(await admin.locator('.sidebar nav a').count(),6);
+  assert.equal(await admin.locator('#login-form,[data-action=logout]').count(),0);assert.equal(await admin.locator('.sidebar nav a').count(),5);
   await admin.reload();await admin.locator('.kpi').first().waitFor();await admin.screenshot({path:path.join(__dirname,'preview.png'),fullPage:true});
   await phone.goto('http://127.0.0.1:4188/mobile/#knowledge/carpet-care');await phone.locator('#mobile-login-form').waitFor();assert.equal(await phone.locator('.detail-card,#list-body').count(),0);
   await fs.mkdir(path.join(__dirname,'test-results'),{recursive:true});await phone.screenshot({path:path.join(__dirname,'test-results/mobile-login.png')});

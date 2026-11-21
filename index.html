@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2455d9">
-<title>智库 Demo · 手机端与管理后台</title>
+<title>素材库 Demo · 手机端与管理后台</title>
 <style>
 :root{font-family:"PingFang SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,sans-serif;color:#20334f;background:#eef2f8;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer}header{height:72px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;background:white;border-bottom:1px solid #dfe6f0;gap:20px}h1{font-size:18px;font-weight:650;margin:0;letter-spacing:.5px;white-space:nowrap}.demo-tabs{display:flex;align-items:center;gap:5px;border-radius:9px;padding:4px;background:#f0f3f9}.demo-tabs button{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:6px;min-width:130px;padding:10px 19px;background:transparent;color:#8090aa;font-size:13px}.demo-tabs button[aria-selected=true]{background:#2455d9;color:white;box-shadow:0 2px 5px #2455d91a}.demo-tabs svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.demo-label{font-size:11px;color:#99a6ba;min-width:90px;text-align:right}button:focus-visible{outline:3px solid #86a6ff;outline-offset:3px}[hidden]{display:none!important}.demo-panel{height:calc(100dvh - 72px)}#panel-mobile{display:flex;align-items:center;justify-content:center;padding:20px;background:#eef2f8}.phone-frame{width:393px;height:852px;max-height:100%;max-width:100%;background:#f4f7fb;outline:1px solid #d5deeb;border-radius:22px;overflow:hidden;box-shadow:0 12px 40px #20334f14;flex-shrink:0}iframe{display:block;width:100%;height:100%;border:0;background:#f4f7fb}#panel-admin{background:#f5f7fb}.noscript{padding:40px;text-align:center}.noscript a{color:#2455d9;margin:0 12px}
 @media(max-width:600px){header{height:64px;padding:0 12px;gap:8px}h1{font-size:14px;letter-spacing:0}.demo-label{display:none}.demo-tabs{padding:3px;gap:2px}.demo-tabs button{min-width:0;padding:9px 12px;font-size:12px;gap:5px}.demo-tabs svg{width:14px;height:14px}.demo-panel{height:calc(100dvh - 64px)}#panel-mobile{padding:0;background:#f4f7fb}.phone-frame{height:100%;max-height:none;border-radius:0;outline:none;box-shadow:none}}
@@ -12,7 +12,7 @@
 </head>
 <body>
 <header>
-<h1>智库 Demo</h1>
+<h1>素材库 Demo</h1>
 <nav class="demo-tabs" role="tablist" aria-label="切换演示端">
 <button id="tab-mobile" type="button" role="tab" aria-selected="true" aria-controls="panel-mobile" data-view="mobile"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></svg>手机端</button>
 <button id="tab-admin" type="button" role="tab" aria-selected="false" aria-controls="panel-admin" tabindex="-1" data-view="admin"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>管理后台</button>
@@ -20,8 +20,8 @@
 <span class="demo-label">客户演示</span>
 </header>
 <main>
-<section id="panel-mobile" class="demo-panel" role="tabpanel" aria-labelledby="tab-mobile"><div class="phone-frame"><iframe id="frame-mobile" title="手机端智库 Demo" allow="web-share; clipboard-write" data-base="mobile/?v=20261121-employees-v2"></iframe></div></section>
-<section id="panel-admin" class="demo-panel" role="tabpanel" aria-labelledby="tab-admin" hidden><iframe id="frame-admin" title="智库管理后台 Demo" data-base="admin/?v=20261121-employees-v2"></iframe></section>
+<section id="panel-mobile" class="demo-panel" role="tabpanel" aria-labelledby="tab-mobile"><div class="phone-frame"><iframe id="frame-mobile" title="手机端素材库 Demo" allow="web-share; clipboard-write" data-base="mobile/?v=20261121-materials"></iframe></div></section>
+<section id="panel-admin" class="demo-panel" role="tabpanel" aria-labelledby="tab-admin" hidden><iframe id="frame-admin" title="素材库管理后台 Demo" data-base="admin/?v=20261121-materials"></iframe></section>
 </main>
 <noscript><p class="noscript">请启用 JavaScript，或直接打开<a href="mobile/">手机端</a><a href="admin/">管理后台</a>。</p></noscript>
 <script>
