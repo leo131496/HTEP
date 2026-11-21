@@ -6,9 +6,11 @@ const actions={upload:'上传',download:'下载',share:'分享',comment:'评论'
 const departments=['产品部','市场部','销售部','技术服务部','运营部'];
 const roleActions={admin:['dashboard','ranking','content','employees','review','permissions'],editor:['dashboard','ranking','content'],reviewer:['dashboard','ranking','review'],employee:[]};
 const uid=prefix=>prefix+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+const demoNames=['林晓','陈敏','周宁','张悦','李晨','王璐','赵宇','沈佳','刘洋','许安','孙琪','郑川'];
+const demoEmails=['lin.xiao','chen.min','zhou.ning','zhang.yue','li.chen','wang.lu','zhao.yu','shen.jia','liu.yang','xu.an','sun.qi','zheng.chuan'].map(name=>name+'@example.com');
 function seed(){
- const names=['林晓','陈敏','周宁','张悦','李晨','王璐','赵宇','沈佳','刘洋','许安','孙琪','郑川'];
- const employees=names.map((name,i)=>({id:'e'+(i+1),name,phone:'139000000'+String(i+1).padStart(2,'0'),number:'EMP'+String(i+1).padStart(3,'0'),department:departments[i%5],role:i===0?'admin':i===1?'editor':i===2?'reviewer':'employee',enabled:i!==11,deleted:false,created:'2026-11-01'}));
+ const names=demoNames;
+ const employees=names.map((name,i)=>({id:'e'+(i+1),name,phone:'139000000'+String(i+1).padStart(2,'0'),email:demoEmails[i],department:departments[i%5],role:i===0?'admin':i===1?'editor':i===2?'reviewer':'employee',enabled:i!==11,deleted:false,created:'2026-11-01'}));
  const folders=[{id:'care',name:'清洁保养',parent:'',scope:'all',targets:[]},{id:'installation',name:'安装施工',parent:'',scope:'all',targets:[]},{id:'product',name:'产品知识',parent:'',scope:'all',targets:[]},{id:'carpet',name:'地毯养护',parent:'care',scope:'all',targets:[]},{id:'daily-care',name:'日常清洁',parent:'carpet',scope:'all',targets:[]},{id:'layout',name:'铺装指引',parent:'installation',scope:'all',targets:[]}];
  const contents=[
  ['carpet-care','地毯日常清洁与保养指南','pdf','daily-care','carpet','地毯日常清洁与保养指南.pdf','日常吸尘、局部污渍处理与定期保养。'],
@@ -54,11 +56,22 @@ function matchesScope(item,employee){return ['all','inherit'].includes(item.scop
 function canView(state,item,employee){return Boolean(employee&&!employee.deleted&&employee.enabled&&item.enabled&&path(state,item.folder).every(f=>matchesScope(f,employee))&&matchesScope(item,employee));}
 function canAct(state,item,employee,action){if(!canView(state,item,employee))return false;if(action==='view')return true;if(action==='download')return item.kind!=='video'&&item.allowDownload;if(action==='share')return item.kind!=='video'&&item.allowShare;if(action==='comment')return item.allowComment;return false;}
 function allowed(employee,page){return Boolean(employee?.enabled&&!employee.deleted&&roleActions[employee.role]?.includes(page));}
+function migrateEmployees(state){
+ state.employees=state.employees.map(({number,...employee})=>{
+  const sample=demoNames.findIndex((name,i)=>employee.id==='e'+(i+1)&&employee.name===name&&employee.phone==='139000000'+String(i+1).padStart(2,'0'));
+  return {...employee,email:typeof employee.email==='string'?employee.email.trim().toLowerCase():sample>=0?demoEmails[sample]:''};
+ });
+ return state;
+}
 function validateEmployee(state,e){
- if(!e.name.trim()||!e.number.trim())throw Error('姓名、工号不能为空');
+ if(!e.name.trim())throw Error('姓名不能为空');
  if(!/^1[3-9]\d{9}$/.test(e.phone))throw Error('请输入正确的 11 位手机号');
+ const email=(e.email||'').trim().toLowerCase();
+ if(email&&(email.length>254||!/^[^\s@]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/.test(email)))throw Error('请输入正确的邮箱地址');
  if(!departments.includes(e.department)||!roles[e.role])throw Error('部门或角色无效');
- if(state.employees.some(x=>x.id!==e.id&&!x.deleted&&(x.phone===e.phone||x.number===e.number)))throw Error('手机号或工号重复');
+ const others=state.employees.filter(x=>x.id!==e.id&&!x.deleted);
+ if(others.some(x=>x.phone===e.phone))throw Error('手机号重复，已被其他员工使用');
+ if(email&&others.some(x=>(x.email||'').trim().toLowerCase()===email))throw Error('邮箱重复，已被其他员工使用');
 }
 function fileKind(name){const ext=name.toLowerCase().split('.').pop();return ['png','jpg','jpeg','gif','webp'].includes(ext)?'image':['mp4','webm','mov'].includes(ext)?'video':ext==='pdf'?'pdf':['doc','docx'].includes(ext)?'word':['xls','xlsx'].includes(ext)?'excel':null;}
 function validateFile(file){if(!file||file.size<=0)throw Error('请选择非空附件');if(file.size>MAX_FILE)throw Error('单个文件不能超过 500MB');if(!fileKind(file.name))throw Error('仅支持图片、视频、PDF、Word、Excel 文件');}
@@ -66,7 +79,7 @@ function filteredEvents(state,{from,to,department='all'}={}){return state.events
 function totals(events){return Object.fromEntries(Object.keys(actions).map(k=>[k,events.filter(e=>e.action===k).length]));}
 function ranking(state,events,metric='total'){
  const rows=state.employees.filter(e=>events.some(v=>v.employeeId===e.id)).map(e=>{const counts=totals(events.filter(v=>v.employeeId===e.id));return {...e,...counts,total:Object.values(counts).reduce((a,b)=>a+b,0)};});
- return rows.sort((a,b)=>b[metric]-a[metric]||a.number.localeCompare(b.number));
+ return rows.sort((a,b)=>b[metric]-a[metric]||a.name.localeCompare(b.name,'zh-CN')||a.phone.localeCompare(b.phone));
 }
 function parseCSV(text){
  const rows=[];let row=[],cell='',quoted=false;
@@ -76,12 +89,12 @@ function parseCSV(text){
 }
 function importEmployees(state,text){
  const rows=parseCSV(text);if(rows.length<2)throw Error('文件中没有员工数据');
- const header=rows[0].map(x=>x.trim()).join(',');if(!['姓名,手机号,工号,部门','姓名,手机号,工号,部门,角色'].includes(header))throw Error('表头应为：姓名,手机号,工号,部门');
+ const header=rows[0].map(x=>x.trim()).join(',');if(header!=='姓名,手机号,邮箱,部门')throw Error('请使用最新模板，表头应为：姓名,手机号,邮箱,部门');
  if(rows.length>501)throw Error('每次最多导入 500 名员工');
  const result=[],draft={...state,employees:[...state.employees]};
- for(let i=1;i<rows.length;i++){try{if(rows[i].length!==rows[0].length)throw Error('列数与表头不一致');const [name,phone,number,department,roleName]=rows[i].map(x=>x.trim());const role=roleName?Object.keys(roles).find(k=>roles[k]===roleName):'employee';const e={id:uid('employee'),name,phone,number,department,role,enabled:true,deleted:false,created:new Date().toISOString().slice(0,10)};validateEmployee(draft,e);draft.employees.push(e);result.push(e);}catch(error){throw Error('第 '+(i+1)+' 行：'+error.message);}}
+ for(let i=1;i<rows.length;i++){try{if(rows[i].length!==rows[0].length)throw Error('列数与表头不一致');const [name,phone,email,department]=rows[i].map(x=>x.trim());const e={id:uid('employee'),name,phone,email:email.toLowerCase(),department,role:'employee',enabled:true,deleted:false,created:new Date().toISOString().slice(0,10)};validateEmployee(draft,e);draft.employees.push(e);result.push(e);}catch(error){throw Error('第 '+(i+1)+' 行：'+error.message);}}
  return result;
 }
-const api={MAX_FILE,roles,actions,departments,roleActions,uid,seed,path,validateFolder,validateScope,canView,canAct,allowed,validateEmployee,fileKind,validateFile,filteredEvents,totals,ranking,parseCSV,importEmployees};
+const api={MAX_FILE,roles,actions,departments,roleActions,uid,seed,migrateEmployees,path,validateFolder,validateScope,canView,canAct,allowed,validateEmployee,fileKind,validateFile,filteredEvents,totals,ranking,parseCSV,importEmployees};
 if(typeof module!=='undefined')module.exports=api;root.AdminModel=api;
 })(globalThis);
