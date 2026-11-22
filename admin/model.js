@@ -34,7 +34,54 @@ function seed(){
  {id:'c4',employeeId:'e5',name:'李晨',contentId:'wood-care',text:'已把家具脚垫检查加入日常巡检，感谢分享。',status:'approved',date:'2026-11-19T03:15:00Z',reviewer:'林晓',reviewed:'2026-11-19T04:00:00Z',reason:''},
  {id:'c5',employeeId:'e8',name:'沈佳',contentId:'well-leed',text:'有兴趣的朋友可以加群领取优惠券。',status:'rejected',date:'2026-11-18T08:00:00Z',reviewer:'周宁',reviewed:'2026-11-18T09:00:00Z',reason:'与知识内容无关，含推广信息。'}
  ];
- return {version:1,employees,folders,contents,events,comments,logs:[]};
+ return migrateComments({version:1,employees,folders,contents,events,comments,logs:[]});
+}
+function migrateComments(state){
+ // Add discussion examples once; never replace existing comments or moderation decisions.
+ if(!state.commentsVersion&&state.comments.some(c=>c.id==='c1'&&c.contentId==='carpet-care')&&state.contents.some(c=>c.id==='carpet-care')){
+  const examples=[
+   {id:'c6',employeeId:'e4',name:'张悦',text:'项目交付时，铺装方向与后续清洁路径需要一起确认吗？附上铺装示意图和保养指南，想听听大家的现场经验。',date:'2026-11-20T01:15:00Z',attachments:[{name:'方块地毯铺装示意图.png',asset:'layout',kind:'image'},{name:'地毯日常清洁与保养指南.pdf',asset:'carpet',kind:'pdf'}]},
+   {id:'c6-r1',parentId:'c6',rootId:'c6',employeeId:'e7',name:'赵宇',text:'建议在交付检查时一起确认。我们会先核对背部箭头，再按主要通行方向安排日常清洁路径。',date:'2026-11-20T02:10:00Z',attachments:[{name:'铺装方向参考.png',asset:'layout',kind:'image'}]},
+   {id:'c6-r2',parentId:'c6-r1',rootId:'c6',employeeId:'e4',name:'张悦',text:'明白了，我会把铺装方向检查加入交付清单。雨天入口区域是否需要增加巡查？',date:'2026-11-20T02:45:00Z'},
+   {id:'c6-r3',parentId:'c6',rootId:'c6',employeeId:'e5',name:'李晨',text:'建议先清除表面砂砾，再按手册要求处理局部污渍，避免直接使用高浓度清洁剂。',date:'2026-11-20T03:30:00Z',editedAt:'2026-11-20T04:00:00Z',history:[{action:'edit',actor:'林晓',date:'2026-11-20T04:00:00Z',reason:'补充清洁剂使用限制，避免误解。',before:{text:'先清除表面砂砾，再处理局部污渍。',status:'approved'},after:{text:'建议先清除表面砂砾，再按手册要求处理局部污渍，避免直接使用高浓度清洁剂。',status:'approved'}}]},
+   {id:'c6-r4',parentId:'c6',rootId:'c6',employeeId:'e8',name:'沈佳',text:'需要保洁服务的同事可以私信领取优惠券。',date:'2026-11-20T04:20:00Z',deleted:true,deletedAt:'2026-11-20T04:30:00Z',history:[{action:'delete',actor:'周宁',date:'2026-11-20T04:30:00Z',reason:'含无关推广信息。',before:{text:'需要保洁服务的同事可以私信领取优惠券。',status:'approved'}}]},
+   {id:'c7',employeeId:'e9',name:'刘洋',text:'已经将局部污渍处理步骤打印给现场同事，配合日常巡检使用很方便。',date:'2026-11-19T06:00:00Z'},
+   {id:'c8',employeeId:'e8',name:'沈佳',text:'欢迎加入优惠活动交流群。',status:'rejected',reason:'与素材讨论无关，请围绕清洁保养交流。',date:'2026-11-18T06:00:00Z'}
+  ];
+  for(const c of examples)if(!state.comments.some(x=>x.id===c.id))state.comments.push({contentId:'carpet-care',status:'approved',reviewer:'林晓',reviewed:c.date,reason:'',...c});
+ }
+ state.comments=state.comments.map(c=>({parentId:null,rootId:c.id,attachments:[],history:[],deleted:false,...c}));
+ state.commentsVersion=1;
+ return state;
+}
+function commentAncestors(state,c){
+ const result=[],seen=new Set([c.id]);let id=c.parentId;
+ while(id){const parent=state.comments.find(x=>x.id===id&&x.contentId===c.contentId);if(!parent||seen.has(id))throw Error('评论回复关系无效');seen.add(id);result.push(parent);id=parent.parentId;}
+ return result;
+}
+function commentCanApprove(state,c){return !c.deleted&&c.status==='pending'&&commentAncestors(state,c).every(p=>!p.deleted&&p.status==='approved');}
+function commentDescendants(state,c){return state.comments.filter(x=>x.contentId===c.contentId&&x.id!==c.id&&commentAncestors(state,x).some(p=>p.id===c.id));}
+function moderateComment(state,{id,contentId,action,text,reason='',actor,date=new Date().toISOString()}){
+ const c=state.comments.find(x=>x.id===id&&x.contentId===contentId);
+ if(!c||c.deleted)throw Error('评论已删除或不属于当前素材');
+ if(!['approve','reject','edit','delete'].includes(action))throw Error('不支持的评论操作');
+ reason=reason.trim();if(action!=='approve'&&(!reason||reason.length>300))throw Error('请填写 1–300 字的处理原因');
+ if(['approve','reject'].includes(action)&&c.status!=='pending')throw Error('该评论已经审核');
+ if(action==='approve'&&!commentCanApprove(state,c))throw Error('请先通过主评论及上级回复');
+ if(action==='edit'){text=(text||'').trim();if(!text||text.length>2000)throw Error('评论内容须为 1–2000 字');if(text===c.text)throw Error('评论内容未修改');}
+ const affected=action==='delete'?[c,...commentDescendants(state,c).filter(x=>!x.deleted)]:[c];
+ for(const item of affected){
+  const before={text:item.text,status:item.status};
+  if(action==='edit'){item.text=text;item.editedAt=date;}
+  if(action==='delete'){item.deleted=true;item.deletedAt=date;}
+  if(action==='approve'||action==='reject')Object.assign(item,{status:action==='approve'?'approved':'rejected',reason:action==='reject'?reason:'',reviewer:actor,reviewed:date});
+  item.history.push({action,actor,date,reason:item===c?reason:'随上级评论删除：'+reason,before,after:{text:item.text,status:item.status}});
+ }
+ if(action==='approve'&&!state.events.some(e=>e.id==='approved-'+id)){
+  const employee=state.employees.find(e=>e.id===c.employeeId),material=state.contents.find(x=>x.id===contentId);
+  if(employee)state.events.push({id:'approved-'+id,actorType:'employee',employeeId:employee.id,name:employee.name,department:employee.department,action:'comment',contentId,contentTitle:material?.title||'已删除的素材',date});
+ }
+ return c;
 }
 function path(state,id){const out=[];while(id){const f=state.folders.find(x=>x.id===id);if(!f||out.some(x=>x.id===id)||out.length>=3)throw Error('目录无效或超过三级');out.unshift(f);id=f.parent;}return out;}
 function validateFolder(state,folder){
@@ -95,6 +142,6 @@ function importEmployees(state,text){
  for(let i=1;i<rows.length;i++){try{if(rows[i].length!==rows[0].length)throw Error('列数与表头不一致');const [name,phone,email,department]=rows[i].map(x=>x.trim());const e={id:uid('employee'),name,phone,email:email.toLowerCase(),department,role:'employee',enabled:true,deleted:false,created:new Date().toISOString().slice(0,10)};validateEmployee(draft,e);draft.employees.push(e);result.push(e);}catch(error){throw Error('第 '+(i+1)+' 行：'+error.message);}}
  return result;
 }
-const api={MAX_FILE,roles,actions,departments,roleActions,uid,seed,migrateEmployees,path,validateFolder,validateScope,canView,canAct,allowed,validateEmployee,fileKind,validateFile,filteredEvents,totals,ranking,parseCSV,importEmployees};
+const api={MAX_FILE,roles,actions,departments,roleActions,uid,seed,migrateEmployees,migrateComments,commentAncestors,commentCanApprove,commentDescendants,moderateComment,path,validateFolder,validateScope,canView,canAct,allowed,validateEmployee,fileKind,validateFile,filteredEvents,totals,ranking,parseCSV,importEmployees};
 if(typeof module!=='undefined')module.exports=api;root.AdminModel=api;
 })(globalThis);

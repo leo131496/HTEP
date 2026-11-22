@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict'),M=require('./model.js');
+const s=M.seed(),events=structuredClone(s.events);
+assert.equal(M.commentAncestors(s,s.comments.find(c=>c.id==='c6-r2')).length,2);
+const legacy=structuredClone(s);delete legacy.commentsVersion;legacy.comments=legacy.comments.filter(c=>/^c[1-5]$/.test(c.id));
+Object.assign(legacy.comments[0],{text:'保留已编辑的旧评论',status:'rejected',reason:'旧审核原因'});
+for(const c of legacy.comments){delete c.parentId;delete c.rootId;delete c.history;delete c.attachments;}
+const original=structuredClone(legacy.comments[0]);M.migrateComments(legacy);const migrated=structuredClone(legacy);M.migrateComments(legacy);
+assert.deepEqual(legacy,migrated);for(const [key,value] of Object.entries(original))assert.deepEqual(legacy.comments[0][key],value);assert.deepEqual(legacy.events,events);
+const act=(id,action,extra={})=>M.moderateComment(s,{id,contentId:'carpet-care',actor:'测试管理员',action,...extra});
+assert.throws(()=>act('c2','approve'),/不属于/);
+assert.throws(()=>act('c1','reject',{reason:'  '}),/原因/);
+act('c1','approve');assert.throws(()=>act('c1','approve'),/已经审核/);assert.equal(s.events.filter(e=>e.id==='approved-c1').length,1);
+const before=structuredClone(s.events);act('c1','edit',{text:'修改后的内容',reason:'更正措辞'});assert.deepEqual(s.events,before);assert.equal(s.comments.find(c=>c.id==='c1').history.at(-1).before.text,'入口区域是否需要根据客流增加深层清洁频次？希望补充一个判断标准。');
+s.comments.push({id:'pending-child',rootId:'c3',parentId:'c3',contentId:'installation-check',employeeId:'e4',name:'张悦',text:'回复',status:'pending',date:'2026-11-21T01:00:00Z',history:[],attachments:[],deleted:false});
+assert.equal(M.commentCanApprove(s,s.comments.at(-1)),false);
+assert.throws(()=>M.moderateComment(s,{id:'pending-child',contentId:'installation-check',action:'approve',actor:'测试'}),/先通过/);
+act('c6-r1','delete',{reason:'删除讨论分支'});assert.equal(s.comments.find(c=>c.id==='c6-r2').deleted,true);assert.equal(s.comments.find(c=>c.id==='c6-r3').deleted,false);assert.deepEqual(s.events,before);
+act('c6','delete',{reason:'删除整条讨论'});assert(s.comments.filter(c=>c.rootId==='c6').every(c=>c.deleted));assert.throws(()=>act('c6-r3','edit',{text:'删除后修改',reason:'修改'}),/已删除/);
+const snapshot=structuredClone(s);M.migrateComments(s);assert.deepEqual(s,snapshot);
+console.log('PASS: legacy migration preserves changes/events and runs once; reply hierarchy; scope validation; required reasons; approval eligibility/idempotency; edit history; cascade deletion and retained contributions.');
