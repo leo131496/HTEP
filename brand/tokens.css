@@ -1,0 +1,19 @@
+/* Palette sampled from the Honeywell China website, 2026-11-23. */
+:root{
+ --brand-red:#e20100;
+ --accent:#5747d1;
+ --accent-strong:#4534b8;
+ --accent-soft:#f0eefb;
+ --ink:#111927;
+ --text:#384250;
+ --muted:#6c737f;
+ --line:#e5e7eb;
+ --border:#d2d6db;
+ --bg:#f9fafb;
+ --white:#fff;
+ --pale:#f0eefb;
+ --green:#167d67;
+ --orange:#946200;
+ --red:#b42318;
+ --font-body:"Noto Sans","Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+}
