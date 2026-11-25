@@ -8,6 +8,10 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   await page.goto('http://127.0.0.1:4188/mobile/');
   await page.locator('#mobile-phone').fill('13900000004');await page.locator('[data-mobile-action=send-code]').click();await page.locator('#mobile-code').fill('123456');await page.locator('#mobile-login-form [type=submit]').click();await page.locator('#list-body').waitFor();
   assert.equal(await page.locator('#folder-total').innerText(),'共 6 条素材');assert(!/最多三级目录/.test(await page.locator('#app').innerText()));assert(await page.locator('#load-more').isHidden());
+  assert(await page.locator('#library-hero').isVisible());assert.equal(await page.locator('.category-card').count(),3);
+  assert.deepEqual(await page.locator('#latest-materials [data-action=detail]').evaluateAll(es=>es.map(e=>e.dataset.id)),['carpet-care','wood-care','installation-check']);
+  await page.locator('#latest-materials [data-action=detail]').first().click();await page.locator('.detail-card').waitFor();await page.locator('.back-row').click();await page.locator('#library-hero').waitFor();
+  await page.locator('#latest-materials [data-mode=all]').click();assert(await page.locator('#library-hero').isHidden());assert(await page.locator('#latest-materials').isHidden());assert.equal(await page.locator('#list-body [data-action=detail]').count(),6);await page.locator('[data-mode=folders]').click();
   // Fixtures stay in this browser page and never become published demo content.
   await page.evaluate(()=>{
    for(let n=0;n<53;n++)uploads.push({...seed[0],id:'batch-'+n,folderId:'',title:'分页样例 '+String(n).padStart(2,'0'),fileName:'分页样例 '+String(n).padStart(2,'0')+(n%2?'.docx':'.pdf'),kind:n%2?'word':'pdf',date:'2026-11-23'});
@@ -19,7 +23,7 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   assert.equal(await rows.count(),20);assert.equal(await page.locator('.folder-row').count(),20);assert.match(await page.locator('#list-end').innerText(),/20 \/ 79/);
   await more.click();assert.equal(await rows.count(),40);assert.equal(await page.locator('.folder-row').count(),26);assert.equal(await files.count(),14);
   await more.click();assert.equal(await rows.count(),60);await more.click();assert.equal(await rows.count(),79);assert(await more.isHidden());assert.equal(new Set(await ids()).size,53);assert.match(await page.locator('#list-end').innerText(),/全部 79 项/);
-  await page.locator('[data-action=browse][data-mode=all]').click();assert.equal(await rows.count(),20);assert.equal(await page.locator('.folder-row').count(),0);assert.equal(await page.locator('#result-count').innerText(),'共 59 条素材');
+  await page.locator('.browse-modes [data-action=browse][data-mode=all]').click();assert.equal(await rows.count(),20);assert.equal(await page.locator('.folder-row').count(),0);assert.equal(await page.locator('#result-count').innerText(),'共 59 条素材');
   await more.click();assert.equal(await files.count(),40);
   const selected=files.nth(24);const selectedId=await selected.getAttribute('data-id');await selected.scrollIntoViewIfNeeded();const before=await page.locator('#app').evaluate(e=>e.scrollTop);
   await selected.click();await page.locator('.detail-card').waitFor();await page.locator('.back-row').click();await page.locator('#list-body').waitFor();assert.equal(await files.count(),40);assert(Math.abs(await page.locator('#app').evaluate(e=>e.scrollTop)-before)<2);

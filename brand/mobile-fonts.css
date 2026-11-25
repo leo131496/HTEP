@@ -2,4 +2,4 @@
 @font-face{font-family:"Noto Sans";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/NotoSans-Regular-latin.woff2") format("woff2")}
 @font-face{font-family:"Noto Sans";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/NotoSans-Medium-latin.woff2") format("woff2")}
 @font-face{font-family:"Noto Sans";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/NotoSans-SemiBold-latin.woff2") format("woff2")}
-:root{--font-body:"Noto Sans",Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif;--accent-strong:#30248f}
+:root{--font-body:"Noto Sans",Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif;--accent:#e20100;--accent-strong:#bd0b09;--accent-soft:#fff0ef;--pale:#fff0ef;--ink:#171717;--text:#333;--muted:#707070;--line:#ededed;--border:#dedede;--bg:#fff}
